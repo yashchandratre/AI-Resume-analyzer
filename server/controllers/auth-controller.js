@@ -14,7 +14,7 @@ const home = async(req,res) =>{
 // Register Controller
 const register = async(req,res)=>{
     try {
-        const {fname,email,password} = req.body;
+        const {fname,email,password} = req.body.data;
 
         const isExist = await User.findOne({email});
         
@@ -31,7 +31,8 @@ const register = async(req,res)=>{
           })
           return res.status(200).json({msg:"User Registerd Sucessfully"})
         }
-
+        console.log(req.body);
+        
     } catch (error) {
         res.status(400).send({msg:"page not found"})
     }
@@ -41,14 +42,15 @@ const register = async(req,res)=>{
 
 const login = async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const { email, password } = req.body.data;
 
     const userData = await User.findOne({ email });
     if (!userData) return res.status(400).json({ msg: "User not found" });
-
+    console.log(userData);
+    
     const isMatch = await bcrypt.compare(password, userData.password);
     if (!isMatch) return res.status(400).json({ msg: "Invalid credentials" });
-
+    
     // JWT contains only the minimum identity/role data. The middleware still
     // re-loads the user from MongoDB so changed admin permissions take effect.
     const token = jwt.sign(
@@ -56,6 +58,7 @@ const login = async (req, res) => {
       process.env.JWT_SECRET,
       { expiresIn: "1h" }
     );
+    console.log(token);
     res.cookie("token",token,{
       httpOnly:true,
       sameSite:"lax",
