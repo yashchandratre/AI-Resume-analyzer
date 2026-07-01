@@ -3,6 +3,51 @@ const User = require('../model/user_model');
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 
+const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
+
+function getAuthPayload(req) {
+  return req.body?.data || req.body || {};
+}
+
+function validateRegistration(payload) {
+  const fname = String(payload.fname || "").trim();
+  const email = String(payload.email || "").trim().toLowerCase();
+  const password = String(payload.password || "");
+  const password2 = payload.password2 === undefined ? password : String(payload.password2 || "");
+
+  if (fname.length < 2 || fname.length > 80) {
+    return { error: "Full name must be between 2 and 80 characters" };
+  }
+
+  if (!emailRegex.test(email)) {
+    return { error: "Please enter a valid email address" };
+  }
+
+  if (!passwordRegex.test(password)) {
+    return {
+      error: "Password must be at least 8 characters and include uppercase, lowercase, and a number",
+    };
+  }
+
+  if (password !== password2) {
+    return { error: "Passwords do not match" };
+  }
+
+  return { value: { fname, email, password } };
+}
+
+function validateLogin(payload) {
+  const email = String(payload.email || "").trim().toLowerCase();
+  const password = String(payload.password || "");
+
+  if (!emailRegex.test(email) || !password) {
+    return { error: "Please enter a valid email and password" };
+  }
+
+  return { value: { email, password } };
+}
+
 const home = async(req,res) =>{
     try {
         res.status(200).send("Auth Router")        
@@ -14,12 +59,18 @@ const home = async(req,res) =>{
 // Register Controller
 const register = async(req,res)=>{
     try {
-        const {fname,email,password} = req.body.data;
+        const validation = validateRegistration(getAuthPayload(req));
+
+        if (validation.error) {
+          return res.status(400).json({ msg: validation.error });
+        }
+
+        const {fname,email,password} = validation.value;
 
         const isExist = await User.findOne({email});
         
         if (isExist){
-            res.status(400).json({msg:"User already Exist"})
+            return res.status(409).json({msg:"User already exists"})
         }
         else{
           const hashedPassword = await bcrypt.hash(password,10);
@@ -29,12 +80,11 @@ const register = async(req,res)=>{
             email,
             password:hashedPassword,
           })
-          return res.status(200).json({msg:"User Registerd Sucessfully"})
+          return res.status(201).json({msg:"User registered successfully"})
         }
-        console.log(req.body);
         
     } catch (error) {
-        res.status(400).send({msg:"page not found"})
+        res.status(500).send({msg:"Unable to register user"})
     }
 }
 
@@ -42,14 +92,23 @@ const register = async(req,res)=>{
 
 const login = async (req, res) => {
   try {
-    const { email, password } = req.body.data;
+    const validation = validateLogin(getAuthPayload(req));
+
+    if (validation.error) {
+      return res.status(400).json({ msg: validation.error });
+    }
+
+    const { email, password } = validation.value;
 
     const userData = await User.findOne({ email });
-    if (!userData) return res.status(400).json({ msg: "User not found" });
-    console.log(userData);
+    if (!userData) return res.status(401).json({ msg: "Invalid credentials" });
     
     const isMatch = await bcrypt.compare(password, userData.password);
-    if (!isMatch) return res.status(400).json({ msg: "Invalid credentials" });
+    if (!isMatch) return res.status(401).json({ msg: "Invalid credentials" });
+
+    if (!process.env.JWT_SECRET) {
+      return res.status(500).json({ msg: "Authentication is not configured" });
+    }
     
     // JWT contains only the minimum identity/role data. The middleware still
     // re-loads the user from MongoDB so changed admin permissions take effect.
@@ -58,11 +117,11 @@ const login = async (req, res) => {
       process.env.JWT_SECRET,
       { expiresIn: "1h" }
     );
-    console.log(token);
+
     res.cookie("token",token,{
       httpOnly:true,
       sameSite:"lax",
-      secure:false,
+      secure: process.env.NODE_ENV === "production",
       maxAge:60 * 60 * 1000
     });
 

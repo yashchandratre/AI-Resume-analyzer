@@ -6,6 +6,8 @@ const mongoose =require("mongoose");
 const dotenv = require("dotenv");
 const router =require("./router/auth-router");
 const adminRouter = require("./router/admin-router");
+const resumeRouter = require("./router/resume-router");
+const analysisRouter = require("./router/analysis-router");
 const cookieParser = require("cookie-parser")
 const user= require('./model/user_model');
 dotenv.config();
@@ -29,10 +31,16 @@ app.use(cookieParser());
 mongoose.connect(process.env.MONGO_DB_URL).then(()=> console.log("Mongo DB Connected"))
 .catch((e)=> console.log("Error To connect MongoDB: ",e));
 
+app.use((req, res, next) => {
+  console.log("🔥 REQUEST:", req.method, req.originalUrl);
+  next();
+});
+
 app.use("/api/auth",router);
 // All admin endpoints live behind /api/admin and are protected in admin-router.js.
 app.use("/api/admin", adminRouter);
-
+app.use("/api/resume", resumeRouter);
+app.use("/api/analysis", analysisRouter);
 
 app.get("/health",async(req,res)=>{
     res.status(200).send({message:"Server is running"});
@@ -40,5 +48,5 @@ app.get("/health",async(req,res)=>{
 });
 
 app.listen(PORT,()=>{
-    console.log(`Server is running on ${PORT}`);
+    console.log("🚀 NEW SERVER STARTED");
 })

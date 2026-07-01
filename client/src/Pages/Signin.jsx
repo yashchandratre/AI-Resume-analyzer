@@ -1,27 +1,33 @@
-import React from 'react'
 import { useForm } from 'react-hook-form';
 import API from '../services/authapi';
 import {Link, useNavigate} from "react-router-dom";
 import { useState } from 'react';
 
 export default function Signin() {
-    const { register, handleSubmit } = useForm();
-    const [errors,setError] = useState([]);
+    const { register, handleSubmit, formState: { errors } } = useForm();
+    const [serverError, setServerError] = useState("");
+    const [isSubmitting, setIsSubmitting] = useState(false);
     const navigate = useNavigate();
+
     const onSubmit = async (data) => {
         try {
+            setIsSubmitting(true);
+            setServerError("");
             const res = await API.post("/auth/login", {
                 data
             }, { withCredentials: true }); 
             localStorage.setItem("token", res.data.token);  
             localStorage.setItem("user", JSON.stringify(res.data.user)); 
-            alert(res.data.msg);
+            alert("Login Successful")
             navigate('/');
         } catch (err) {
             console.log("Error In Login: ", err);
-            alert(err.response?.data?.msg || "Login failed!");
+            setServerError(err.response?.data?.msg || "Login failed!");
+        } finally {
+            setIsSubmitting(false);
         }
     };
+
     return (
         <div className="min-h-screen flex items-center justify-center bg-white">
             <div className="w-full max-w-md p-8 rounded-xl shadow-lg border border-gray-100">
@@ -35,12 +41,18 @@ export default function Signin() {
                         <span className="text-sm text-gray-700">Email</span>
                         <input
                             type="email"
-                            {...register('email', { required: 'Email is required' })}
+                            {...register('email', {
+                                required: 'Email is required',
+                                pattern: {
+                                    value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+                                    message: 'Enter a valid email address',
+                                },
+                            })}
                             className={`mt-1 block w-full rounded-md border px-3 py-2 text-sm focus:outline-none ${errors.email ? 'border-red-400' : 'border-gray-200'
                                 }`}
                             placeholder="you@example.com"
                         />
-                        {errors.email && <p className="text-xs text-red-500 mt-1">{errors.email}</p>}
+                        {errors.email && <p className="text-xs text-red-500 mt-1">{errors.email.message}</p>}
                     </label>
 
                     <label className="block mb-3">
@@ -52,7 +64,7 @@ export default function Signin() {
                                 }`}
                             placeholder="Enter your password"
                         />
-                        {errors.password && <p className="text-xs text-red-500 mt-1">{errors.password}</p>}
+                        {errors.password && <p className="text-xs text-red-500 mt-1">{errors.password.message}</p>}
                     </label>
 
                     <div className="flex items-center justify-between mb-6">
@@ -66,18 +78,21 @@ export default function Signin() {
                         </label>
                         <button
                             type="button"
-                            onClick={() => alert('Forgot password flow — implement password reset')}
+                            onClick={() => setServerError('Password reset is not available yet.')}
                             className="text-sm text-[#0B2545] hover:underline"
                         >
                             Forgot password?
                         </button>
                     </div>
 
+                    {serverError && <p className="mb-4 rounded-md bg-red-50 px-3 py-2 text-sm text-red-600">{serverError}</p>}
+
                     <button
                         type="submit"
-                        className="w-full inline-flex items-center justify-center gap-2 px-4 py-2 rounded-md bg-[#FF6A00] text-white font-semibold hover:opacity-95"
+                        disabled={isSubmitting}
+                        className="w-full inline-flex items-center justify-center gap-2 px-4 py-2 rounded-md bg-[#FF6A00] text-white font-semibold hover:opacity-95 disabled:cursor-not-allowed disabled:opacity-60"
                     >
-                        Sign in
+                        {isSubmitting ? 'Signing in...' : 'Sign in'}
                     </button>
                 </form>
 
