@@ -1,4 +1,6 @@
 import { useRef, useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { UploadCloud, File, AlertCircle, CheckCircle, Sparkles } from "lucide-react";
 import API from "../../services/authapi";
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024;
@@ -23,6 +25,7 @@ export default function ResumeUploadCard({ onUploadSuccess }) {
   const [isUploading, setIsUploading] = useState(false);
 
   const applyFile = (selectedFile) => {
+    if (!selectedFile) return;
     const validationError = validateResumeFile(selectedFile);
     setSuccess("");
     setError(validationError);
@@ -67,7 +70,7 @@ export default function ResumeUploadCard({ onUploadSuccess }) {
   return (
     <section
       id="upload"
-      className="mx-auto w-full max-w-3xl rounded-lg border border-slate-200 bg-white p-5 shadow-sm sm:p-8"
+      className="mx-auto w-full max-w-3xl rounded-3xl border border-slate-100 bg-white p-6 sm:p-8 shadow-xl shadow-slate-200/40 mb-10"
     >
       <div
         onDragOver={(event) => {
@@ -76,18 +79,29 @@ export default function ResumeUploadCard({ onUploadSuccess }) {
         }}
         onDragLeave={() => setIsDragging(false)}
         onDrop={handleDrop}
-        className={`flex min-h-72 flex-col items-center justify-center rounded-lg border-2 border-dashed px-4 py-8 text-center transition ${
-          isDragging ? "border-teal-500 bg-teal-50" : "border-slate-300 bg-slate-50"
+        className={`relative flex min-h-72 flex-col items-center justify-center rounded-2xl border-2 border-dashed px-6 py-8 text-center transition-all cursor-pointer ${
+          isDragging
+            ? "border-indigo-500 bg-indigo-50/40"
+            : "border-slate-200 bg-slate-50/50 hover:bg-slate-50 hover:border-slate-350"
         }`}
+        onClick={() => inputRef.current?.click()}
       >
-        <div className="grid h-14 w-14 place-items-center rounded-full bg-white text-2xl text-teal-700 shadow-sm">
-          ^
-        </div>
-        <h2 className="mt-5 text-xl font-semibold text-slate-950">Upload Resume</h2>
-        <p className="mt-2 max-w-md text-sm text-slate-500">
-          Drag and drop your resume here, or choose a file from your device.
+        {/* Animated Upload Icon */}
+        <motion.div
+          animate={isUploading ? { y: [0, -10, 0] } : {}}
+          transition={isUploading ? { repeat: Infinity, duration: 1.5 } : {}}
+          className={`grid h-16 w-16 place-items-center rounded-2xl bg-white shadow-md text-3xl mb-5 text-indigo-600 border border-slate-100`}
+        >
+          <UploadCloud className="h-7 w-7" />
+        </motion.div>
+
+        <h2 className="text-lg font-bold text-slate-900">Upload Your Resume</h2>
+        <p className="mt-2 max-w-sm text-sm text-slate-500 font-medium">
+          Drag and drop your document here, or click to browse files
         </p>
-        <p className="mt-1 text-xs font-medium text-slate-500">PDF or DOCX, maximum 5MB.</p>
+        <p className="mt-1 text-xs text-slate-400 font-semibold">
+          Supports PDF or DOCX up to 5MB.
+        </p>
 
         <input
           ref={inputRef}
@@ -98,33 +112,70 @@ export default function ResumeUploadCard({ onUploadSuccess }) {
           onChange={(event) => applyFile(event.target.files?.[0])}
         />
 
-        <button
-          type="button"
-          onClick={() => inputRef.current?.click()}
-          className="mt-6 rounded-md bg-slate-900 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-800"
-        >
-          Choose File
-        </button>
+        <AnimatePresence>
+          {file && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              className="mt-6 flex items-center gap-2 max-w-full truncate rounded-xl bg-white border border-slate-100 px-4 py-2.5 shadow-sm text-sm font-semibold text-slate-700"
+              onClick={(e) => e.stopPropagation()} // Prevent double trigger
+            >
+              <File className="h-4.5 w-4.5 text-indigo-500 flex-shrink-0" />
+              <span className="truncate">{file.name}</span>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
-        {file && (
-          <p className="mt-4 max-w-full truncate rounded-md bg-white px-3 py-2 text-sm font-medium text-slate-700">
-            {file.name}
-          </p>
-        )}
+        <AnimatePresence>
+          {error && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="mt-4 flex items-center gap-1.5 text-sm font-semibold text-rose-600"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <AlertCircle className="h-4.5 w-4.5" />
+              <span>{error}</span>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
-        {error && <p className="mt-4 text-sm font-medium text-red-600">{error}</p>}
-        {success && <p className="mt-4 text-sm font-medium text-emerald-700">✓ {success}.</p>}
+        <AnimatePresence>
+          {success && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="mt-4 flex items-center gap-1.5 text-sm font-semibold text-emerald-600"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <CheckCircle className="h-4.5 w-4.5" />
+              <span>{success}</span>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
 
-      <button
+      <motion.button
+        whileHover={file && !isUploading ? { scale: 1.01 } : {}}
+        whileTap={file && !isUploading ? { scale: 0.99 } : {}}
         type="button"
         disabled={!file || isUploading}
         onClick={handleUpload}
-        className="mt-6 flex w-full items-center justify-center gap-2 rounded-md bg-teal-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-teal-700 disabled:cursor-not-allowed disabled:bg-slate-300"
+        className="mt-5 flex w-full items-center justify-center gap-2 rounded-xl bg-indigo-600 px-5 py-3 text-sm font-bold text-white shadow-lg shadow-indigo-600/10 transition hover:bg-indigo-700 disabled:cursor-not-allowed disabled:bg-slate-200 disabled:text-slate-400 disabled:shadow-none cursor-pointer"
       >
-        {isUploading && <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/40 border-t-white" />}
-        {isUploading ? "Uploading..." : "Upload Resume"}
-      </button>
+        {isUploading ? (
+          <>
+            <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/40 border-t-white" />
+            Processing & Uploading...
+          </>
+        ) : (
+          <>
+            <Sparkles className="h-4.5 w-4.5" />
+            Upload & Analyze Resume
+          </>
+        )}
+      </motion.button>
     </section>
   );
 }

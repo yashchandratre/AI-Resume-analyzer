@@ -1,26 +1,35 @@
-import { XCircle } from "lucide-react";
+import React from "react";
+import { AlertTriangle, HelpCircle } from "lucide-react";
+import { motion } from "framer-motion";
 
-const WeaknessCard = ({ weaknesses }) => {
+const WeaknessCard = ({ weaknesses = [] }) => {
   return (
-    <div className="bg-white rounded-xl shadow-md p-6">
-      <h2 className="text-red-600 text-xl font-semibold mb-4">
-        Weaknesses
-      </h2>
+    <div className="bg-white rounded-3xl border border-slate-100 p-6 sm:p-8 shadow-md shadow-slate-100/50">
+      <div className="flex items-center gap-2 mb-6">
+        <AlertTriangle className="h-5 w-5 text-rose-500" />
+        <h2 className="text-sm font-bold text-slate-400 uppercase tracking-wider">
+          Areas of Improvement
+        </h2>
+      </div>
 
-      <ul className="space-y-3">
-        {weaknesses.map((item, index) => (
-          <li
-            key={index}
-            className="flex items-center gap-3"
-          >
-            <XCircle
-              className="text-red-500"
-              size={18}
-            />
-            <span>{item}</span>
-          </li>
-        ))}
-      </ul>
+      {weaknesses.length === 0 ? (
+        <p className="text-sm text-slate-400 font-medium">No critical weaknesses detected!</p>
+      ) : (
+        <ul className="space-y-4">
+          {weaknesses.map((item, index) => (
+            <motion.li
+              key={index}
+              initial={{ opacity: 0, x: 10 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: index * 0.05 }}
+              className="flex items-start gap-3.5"
+            >
+              <HelpCircle className="text-rose-450 h-5 w-5 mt-0.5 flex-shrink-0" />
+              <span className="text-slate-700 text-sm font-medium leading-relaxed">{item}</span>
+            </motion.li>
+          ))}
+        </ul>
+      )}
     </div>
   );
 };

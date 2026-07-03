@@ -1,5 +1,6 @@
 const fs = require("fs/promises");
 const Resume = require("../model/resume_model");
+const AnalysisResult = require("../model/analysisresult_model");
 const { extractPdfText } = require("../services/pdfService");
 const { extractDocxText } = require("../services/docxService");
 
@@ -50,12 +51,25 @@ async function uploadResume(req, res) {
     });
   }
 }
+const getAllResumesController = async (req, res) => {
+  try {
+    const resumes = await Resume.find({ user: req.user._id }).sort({
+      uploadedAt: -1,
+    });
+    res.status(200).json({ resumes });
+  } catch (error) {
+    console.error("Error fetching resumes:", error);
+    res
+      .status(500)
+      .json({ error: "An error occurred while fetching resumes." });
+  }
+};
 
 const deleteResume = async (req, res) => {
   try {
     const resumeId = req.params.resumeId;
     const resume = await Resume.findById(resumeId);
-
+    const analysisresult = await AnalysisResult.find({resume:resumeId})
     if (!resume) {
       return res.status(404).json({ error: "Resume not found" });
     }
@@ -66,6 +80,9 @@ const deleteResume = async (req, res) => {
     }
 
     await Resume.findByIdAndDelete(resumeId);
+    if(analysisresult){
+      await AnalysisResult.findByIdAndDelete(resumeId)
+    }
     res.status(200).json({ message: "Resume deleted successfully" });
   } catch (error) {
     console.error("Error deleting resume:", error);

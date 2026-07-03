@@ -1,8 +1,71 @@
-import React from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { FileText, CalendarDays, Trash2, Sparkles, AlertCircle } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import API from "../../services/authapi";
 
-const MyResumes = ({ resumes = [], onAnalyze, onDelete }) => {
+const Resume = () => {
+  const navigate = useNavigate();
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
+  const [user] = useState(() => {
+    try {
+      return JSON.parse(localStorage.getItem("user")) || {};
+    } catch {
+      return {};
+    }
+  });
+
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    navigate("/login");
+  };
+
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      navigate("/login");
+    }
+  }, []);
+  const [resumes, setResumes] = useState([]);
+
+  const fetchResumes = useCallback(async () => {
+    try {
+      const response = await API.get("/resume/resumes", { withCredentials: true });
+      setResumes(response.data.resumes);
+    } catch (error) {
+      console.error("Error fetching resumes:", error);
+      setResumes([]);
+    }
+  }, []);
+
+  const onAnalyzeResume = async (resumeId) => {
+    try {
+
+      navigate(`/analysis/${resumeId}`,);
+    } catch (error) {
+      console.log("FULL ERROR");
+      console.error(error);
+    }
+  };
+
+  const onDeleteResume = async (resumeId) => {
+    try {
+      await API.delete(`/resume/${resumeId}`, { withCredentials: true });
+      setResumes((prevResumes) => prevResumes.filter((resume) => resume._id !== resumeId));
+    } catch (error) {
+      console.error("Error deleting resume:", error);
+    }
+  };
+  useEffect(() => {
+    const timerId = window.setTimeout(() => {
+      fetchResumes();
+    }, 0);
+
+    return () => window.clearTimeout(timerId);
+  }, [fetchResumes]);
+
   // Fetch scores cached during analysis
   const savedScores = JSON.parse(localStorage.getItem("resume_scores") || "{}");
 
@@ -106,8 +169,9 @@ const MyResumes = ({ resumes = [], onAnalyze, onDelete }) => {
                   </span>
                 </div>
                 <div className="flex justify-between text-xs font-medium text-slate-400">
-                  <span>Size: {((resume.fileSize / 1024).toFixed(1))} KB</span>
+                  <span>Size: {(resume.fileSize / 1024).toFixed(1)} KB</span>
                   <span className="uppercase">{(resume.mimeType.split("/")[1]?.length < 4 ? resume.mimeType.split("/")[1] : "DOCX") || "DOCX"}</span>
+
                 </div>
               </div>
             </div>
@@ -115,7 +179,7 @@ const MyResumes = ({ resumes = [], onAnalyze, onDelete }) => {
             {/* Buttons */}
             <div className="mt-4 flex gap-2">
               <button
-                onClick={() => onAnalyze(resume._id)}
+                onClick={() => onAnalyzeResume(resume._id)}
                 className="flex flex-1 items-center justify-center gap-1.5 rounded-xl bg-indigo-600 px-4 py-2.5 text-xs font-bold text-white transition hover:bg-indigo-750 cursor-pointer shadow-sm shadow-indigo-600/10"
               >
                 <Sparkles className="h-4 w-4" />
@@ -123,7 +187,7 @@ const MyResumes = ({ resumes = [], onAnalyze, onDelete }) => {
               </button>
 
               <button
-                onClick={() => onDelete(resume._id)}
+                onClick={() => onDeleteResume(resume._id)}
                 className="rounded-xl border border-rose-250 p-2.5 text-rose-500 hover:bg-rose-50 transition cursor-pointer"
                 title="Delete Resume"
               >
@@ -137,4 +201,4 @@ const MyResumes = ({ resumes = [], onAnalyze, onDelete }) => {
   );
 };
 
-export default MyResumes;
+export default Resume;

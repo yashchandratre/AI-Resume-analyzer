@@ -6,10 +6,14 @@ import Sidebar from "../../components/sidebar/Sidebar";
 import ResumeUploadCard from "../../components/upload/ResumeUploadCard";
 import MyResumes from "./MyResumes";
 import API from "../../services/authapi";
+import { toast } from "sonner";
 
 export default function Dashboard() {
     const navigate = useNavigate();
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
+    const [analysisResult, setAnalysisResult] = useState([]);
+    const [resumes, setResumes] = useState([]);
 
     const [user] = useState(() => {
         try {
@@ -19,19 +23,12 @@ export default function Dashboard() {
         }
     });
 
-    const handleLogout = () => {
-        localStorage.removeItem("token");
-        localStorage.removeItem("user");
-        navigate("/login");
-    };
-
     useEffect(() => {
         const token = localStorage.getItem("token");
         if (!token) {
             navigate("/login");
         }
     }, []);
-    const [resumes, setResumes] = useState([]);
 
     const fetchResumes = useCallback(async () => {
         try {
@@ -43,21 +40,30 @@ export default function Dashboard() {
         }
     }, []);
 
+
+    // const onAnalyzeResume = async (resumeId) => {
+    //     try {
+    //         const response = await API.get(`/analysis/analysisresult/${resumeId}`, { withCredentials: true });
+    //         console.log(response.data);
+
+    //         if (!response.data.length != 0 && response.data.some(result => result.resume === resumeId)) {
+    //             navigate(`/analysis/${resumeId}`,);
+    //         } else {
+    //             toast.error("This resume has already been analyzed. Redirecting to the analysis result page.");
+    //             navigate(`/allanalysis/${resumeId}`,);
+    //         }
+    //     } catch (error) {
+    //         console.log("FULL ERROR");
+    //         console.error(error);
+    //     }
+    // };
     const onAnalyzeResume = async (resumeId) => {
         try {
-            
-            navigate(`/analysis/${resumeId}`,);
+            navigate(`/analysis/${resumeId}`);
         } catch (error) {
-            console.log("FULL ERROR");
-
-            console.log(error);
-            console.log(stack);
-            console.log(error.response);
-            console.log(error.request);
-            console.log(error.message);
+            console.error(error);
         }
     };
-
     const onDeleteResume = async (resumeId) => {
         try {
             await API.delete(`/resume/${resumeId}`, { withCredentials: true });
@@ -75,24 +81,14 @@ export default function Dashboard() {
     }, [fetchResumes]);
 
     return (
-        <div className="min-h-screen bg-slate-100 text-slate-950">
-            <div className="flex min-h-screen">
-                <Sidebar
-                    isOpen={isSidebarOpen}
-                    onClose={() => setIsSidebarOpen(false)}
-                    onLogout={handleLogout}
-                />
-
-                <div className="flex min-w-0 flex-1 flex-col">
-                    <Navbar user={user} onMenuClick={() => setIsSidebarOpen(true)} />
-
-                    <main className="flex-1 px-4 py-8 sm:px-6 lg:px-8">
-                        <WelcomeSection user={user} />
-                        <ResumeUploadCard onUploadSuccess={fetchResumes} />
-                        <MyResumes resumes={resumes} onAnalyze={onAnalyzeResume} onDelete={onDeleteResume} />
-                    </main>
-                </div>
-            </div>
-        </div>
+        <>
+        <section id="wellcome-section">
+            <WelcomeSection user={user} resumes={resumes} />
+        </section>
+        <section id="upload">
+            <ResumeUploadCard onUploadSuccess={fetchResumes} />
+        </section>
+            <MyResumes resumes={resumes} onAnalyze={onAnalyzeResume} onDelete={onDeleteResume} />
+        </>
     );
 }

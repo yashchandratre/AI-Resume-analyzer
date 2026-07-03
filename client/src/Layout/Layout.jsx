@@ -1,12 +1,11 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-
+import { motion, AnimatePresence } from "framer-motion";
 import Sidebar from "../components/sidebar/Sidebar";
 import Navbar from "../components/navbar/Navbar";
 
 export default function Layout({ children }) {
     const navigate = useNavigate();
-
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
     const [user] = useState(() => {
@@ -24,9 +23,8 @@ export default function Layout({ children }) {
     };
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-slate-100 via-white to-indigo-50">
-
-            {/* Sidebar */}
+        <div className="min-h-screen bg-slate-50/50 flex">
+            {/* Sidebar (Desktop and Mobile Drawer) */}
             <Sidebar
                 isOpen={isSidebarOpen}
                 onClose={() => setIsSidebarOpen(false)}
@@ -34,25 +32,28 @@ export default function Layout({ children }) {
             />
 
             {/* Main Section */}
-            <div className="lg:ml-72 flex min-h-screen flex-col">
+            <div className="flex-1 flex flex-col min-h-screen lg:pl-72">
+                {/* Navbar (Sticky top) */}
+                <Navbar
+                    user={user}
+                    onMenuClick={() => setIsSidebarOpen(true)}
+                />
 
-                {/* Navbar */}
-                <header className="sticky top-0 z-30 border-b border-slate-200 bg-white/80 backdrop-blur-md">
-                    <Navbar
-                        user={user}
-                        onMenuClick={() => setIsSidebarOpen(true)}
-                    />
-                </header>
-
-                {/* Page Content */}
-                <main className="flex-1 overflow-y-auto">
-                    <div className="mx-auto max-w-7xl px-6 py-8">
-
-                        {children}
-
+                {/* Page Content with Framer Motion page transition */}
+                <main className="flex-1 px-4 sm:px-6 lg:px-8 py-8 overflow-y-auto">
+                    <div className="mx-auto max-w-7xl">
+                        <AnimatePresence mode="wait">
+                            <motion.div
+                                initial={{ opacity: 0, y: 15 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                exit={{ opacity: 0, y: -15 }}
+                                transition={{ duration: 0.35, ease: "easeOut" }}
+                            >
+                                {children}
+                            </motion.div>
+                        </AnimatePresence>
                     </div>
                 </main>
-
             </div>
         </div>
     );
