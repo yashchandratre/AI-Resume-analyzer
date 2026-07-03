@@ -145,7 +145,33 @@ Analysis History
 
 # 📸 Screenshots
 
-> Add screenshots here after completing the UI.
+<h1>Login</h1>
+
+<img src="screenshots/login.png" width="700">
+
+<h1>Signup</h1>
+
+<img src="screenshots/signup.png" width="700">
+
+<h1>Dashboard</h1>
+
+<img src="screenshots/dashboard.png" width="700">
+
+<h1>Upload</h1>
+
+<img src="screenshots/upload.png" width="700">
+
+<h1>Resume</h1>
+
+<img src="screenshots/resume.png" width="700">
+
+<h1>Analysis Page</h1>
+
+<img src="screenshots/Analysispage.png" width="700">
+
+<h1>Analysis Result</h1>
+
+<img src="screenshots/AnalysisResult.png" width="700">
 
 Example:
 
