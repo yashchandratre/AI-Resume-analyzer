@@ -145,33 +145,32 @@ Analysis History
 
 # 📸 Screenshots
 
-<h1>Login</h1>
+<h1>Login & Signup</h1>
 
-<img src="screenshots/login.png" width="700">
-
-<h1>Signup</h1>
-
-<img src="screenshots/signup.png" width="700">
+<p align="center">
+    <img src="screenshots/login.png" width="45%">
+    <img src="screenshots/signup.png" width="45%">
+</p>
 
 <h1>Dashboard</h1>
 
-<img src="screenshots/dashboard.png" width="700">
+<img src="screenshots/Dashboard.png" width="100%">
 
 <h1>Upload</h1>
 
-<img src="screenshots/upload.png" width="700">
+<img src="screenshots/Upload.png" width="100%">
 
 <h1>Resume</h1>
 
-<img src="screenshots/resume.png" width="700">
+<img src="screenshots/Resume.png" width="100%">
 
 <h1>Analysis Page</h1>
 
-<img src="screenshots/Analysispage.png" width="700">
+<img src="screenshots/Analysispage.png" width="100%">
 
 <h1>Analysis Result</h1>
 
-<img src="screenshots/AnalysisResult.png" width="700">
+<img src="screenshots/AnalysisResult.png" width="100%">
 
 Example:
 
