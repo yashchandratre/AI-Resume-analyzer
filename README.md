@@ -305,7 +305,7 @@ Full Stack Web Developer
 
 💻 GitHub: *(Add your GitHub URL)*
 
-🌐 Portfolio: *(Add your Portfolio URL)*
+🌐 Portfolio: *https://www.yashchandratre-portfolio.netlify.com*
 
 ---
 
