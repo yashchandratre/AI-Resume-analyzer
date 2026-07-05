@@ -301,11 +301,9 @@ Full Stack Web Developer
 
 📧 Email: chandratreyash@gmail.com
 
-🔗 LinkedIn: *(Add your LinkedIn URL)*
+🔗 LinkedIn: *https://www.linkedin.com/in/yash-chandratre-7b8309333/*
 
-💻 GitHub: *(Add your GitHub URL)*
-
-🌐 Portfolio: *(Add your Portfolio URL)*
+🌐 Portfolio: *https://yashchandratre-portfolio.netlify.app/*
 
 ---
 
