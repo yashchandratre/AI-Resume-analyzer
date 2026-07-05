@@ -52,9 +52,12 @@ export default function ResumeUploadCard({ onUploadSuccess }) {
       setIsUploading(true);
       setError("");
       setSuccess("");
+      const startTime = performance.now();
       const response = await API.post("/resume/upload", formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
+      const endTime = performance.now();
+      console.log(`Resume upload took ${(endTime - startTime).toFixed(2)} ms`);
 
       setSuccess(response.data?.message || "Resume uploaded successfully");
       setFile(null);

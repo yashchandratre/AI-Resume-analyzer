@@ -3,6 +3,7 @@ import { useParams, Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { ArrowLeft, Sparkles, AlertCircle } from "lucide-react";
 
+import { useRef } from "react";
 import ScoreCard from "./ScoreCard";
 import SummaryCard from "./SummaryCard";
 import StrengthCard from "./StrengthCard";
@@ -18,41 +19,6 @@ export default function AnalysisResult() {
     const [analysis, setAnalysis] = useState(null);
     const [error, setError] = useState("");
     const navigate = useNavigate();
-    // const fetchResume = async () => {
-    //     try {
-    //         setError("");
-    //         const existingAnalysisResponse = await API.get(`/analysis/analysisresult/${resumeId}`);
-    //         console.log(existingAnalysisResponse.data.analysis.length);
-
-    //         if (existingAnalysisResponse.data.analysis.length > 0) {
-    //             setAnalysis(existingAnalysisResponse.data.analysis);
-    //         } else {
-    //             const response = await API.post(`/analysis/${resumeId}`);
-    //             logging.info("Analysis response:", response);
-    //             setAnalysis(response.data.analysis);
-    //             if (response.data?.analysis) {
-    //                 const score = response.data.analysis.overallScore;
-
-    //                 // Cache the analysis score in localStorage for Dashboard statistics
-    //                 try {
-    //                     const savedScores = JSON.parse(localStorage.getItem("resume_scores") || "{}");
-    //                     savedScores[resumeId] = score;
-    //                     localStorage.setItem("resume_scores", JSON.stringify(savedScores));
-    //                 } catch (e) {
-    //                     console.error("Failed to write score cache:", e);
-    //                 }
-
-    //             } else {
-    //                 throw new Error("No analysis returned");
-    //             }
-    //         }
-    //     } catch (error) {
-    //         console.error(error);
-    //         toast.error(error.response?.data?.message || "Failed to analyze resume. Please try again.");
-    //         setError(error.response?.data?.msg || "Failed to analyze resume. Please try again.");
-    //         navigate("/");
-    //     }
-    // };
 
     const fetchResume = async () => {
         try {
@@ -74,7 +40,15 @@ export default function AnalysisResult() {
             setError(message);
         }
     };
+
+    const hasFetched = useRef(false);
+
     useEffect(() => {
+        if (hasFetched.current) return;
+
+        hasFetched.current = true;
+
+        console.log("Fetching resume analysis...");
         fetchResume();
     }, [resumeId]);
 

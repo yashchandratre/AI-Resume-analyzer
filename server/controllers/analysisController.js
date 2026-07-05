@@ -106,7 +106,6 @@ const analyzeResumeController = async (req, res) => {
       success: true,
       analysis: newAnalysisResult.analysisData,
     });
-
   } catch (error) {
     console.error(error);
 
@@ -176,9 +175,37 @@ const getAllAnalysisResultController = async (req, res) => {
   }
 };
 
+const getAnalysisScores = async (req, res) => {
+  try {
+    const analysisResults = await AnalysisResult.find(
+      { user: req.user._id },
+      {
+        resume: 1,
+        "analysisData.overallScore": 1,
+        _id: 0,
+      },
+    );
+
+    const scores = analysisResults.map((item) => ({
+      resumeId: item.resume,
+      overallScore: item.analysisData.overallScore,
+    }));
+
+    return res.status(200).json({
+      scores,
+    });
+  } catch (error) {
+    console.error("Error fetching analysis scores:", error);
+    return res.status(500).json({
+      success: false,
+      msg: "An error occurred while fetching analysis scores.",
+    });
+  }
+};
 module.exports = {
   analyzeResumeController,
   getAllResumesController,
   getAnalysisResultController,
   getAllAnalysisResultController,
+  getAnalysisScores,
 };

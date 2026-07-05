@@ -32,12 +32,13 @@ Resume:
 ${resumeText}
 `;
   try {
+    console.time("Gemini")
     const response = await ai.models.generateContent({
       model: "gemini-2.5-flash",
       contents: prompt,
     });
-
-    console.log("Gemini Response:", response);
+    console.timeEnd("Gemini")
+    // console.log("Gemini Response:", response);
     const text = response.text || "";
     const cleaned = text
     .replace(/```json/g, "")

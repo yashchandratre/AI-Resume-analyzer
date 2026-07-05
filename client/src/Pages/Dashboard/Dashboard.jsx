@@ -7,6 +7,7 @@ import ResumeUploadCard from "../../components/upload/ResumeUploadCard";
 import MyResumes from "./MyResumes";
 import API from "../../services/authapi";
 import { toast } from "sonner";
+import { useRef } from "react";
 
 export default function Dashboard() {
     const navigate = useNavigate();
@@ -14,6 +15,8 @@ export default function Dashboard() {
 
     const [analysisResult, setAnalysisResult] = useState([]);
     const [resumes, setResumes] = useState([]);
+    const [savedScores,setSavedScores] = useState([]);
+    const hasFetched = useRef(false);
 
     const [user] = useState(() => {
         try {
@@ -28,6 +31,25 @@ export default function Dashboard() {
         if (!token) {
             navigate("/login");
         }
+    }, []);
+
+    const fetchScore = async () => {
+        try {
+            const score = await API.get("/analysis/score");
+            setSavedScores(score.data);
+            console.log(score);
+        } catch (error) {
+            console.log(error);
+        }
+    }
+    console.log(savedScores);
+
+    useEffect(() => {
+        if (hasFetched.current) return;
+
+        hasFetched.current = true;
+
+        fetchScore();
     }, []);
 
     const fetchResumes = useCallback(async () => {
@@ -67,7 +89,7 @@ export default function Dashboard() {
     const onDeleteResume = async (resumeId) => {
         try {
             await API.delete(`/resume/${resumeId}`, { withCredentials: true });
-            setResumes((prevResumes) => prevResumes.filter((resume) => resume._id !== resumeId));
+            fetchResumes();
         } catch (error) {
             console.error("Error deleting resume:", error);
         }
@@ -82,13 +104,13 @@ export default function Dashboard() {
 
     return (
         <>
-        <section id="wellcome-section">
-            <WelcomeSection user={user} resumes={resumes} />
-        </section>
-        <section id="upload">
-            <ResumeUploadCard onUploadSuccess={fetchResumes} />
-        </section>
-            <MyResumes resumes={resumes} onAnalyze={onAnalyzeResume} onDelete={onDeleteResume} />
+            <section id="wellcome-section">
+                <WelcomeSection user={user} resumes={resumes} scores={savedScores} />
+            </section>
+            <section id="upload">
+                <ResumeUploadCard onUploadSuccess={fetchResumes} />
+            </section>
+            <MyResumes resumes={resumes} onAnalyze={onAnalyzeResume} onDelete={onDeleteResume} scores={savedScores}/>
         </>
     );
 }

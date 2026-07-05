@@ -2,12 +2,12 @@ import React from "react";
 import { motion } from "framer-motion";
 import { FileText, CalendarDays, Trash2, Sparkles, AlertCircle } from "lucide-react";
 
-const MyResumes = ({ resumes = [], onAnalyze, onDelete }) => {
+const MyResumes = ({ resumes = [],scores={}, onAnalyze, onDelete }) => {
   // Fetch scores cached during analysis
-  const savedScores = JSON.parse(localStorage.getItem("resume_scores") || "{}");
-
+  const savedScores = scores.scores || [];
+  
   const getScoreBadge = (resumeId) => {
-    const score = savedScores[resumeId];
+    const score = savedScores[savedScores.findIndex(item => item.resumeId === resumeId)]?.overallScore;
     if (score === undefined) {
       return (
         <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-600">

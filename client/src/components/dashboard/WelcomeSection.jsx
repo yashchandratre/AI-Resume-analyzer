@@ -1,29 +1,34 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { FileText, Award, Star, CheckCircle, Sparkles } from "lucide-react";
+import API from "../../services/authapi";
 
-export default function WelcomeSection({ user, resumes = [] }) {
+export default function WelcomeSection({ user, resumes = [], scores = {} }) {
   const displayName = user?.fname || user?.name || "User";
 
-  // Calculate statistics from resumes and cached localStorage scores
-  const savedScores = JSON.parse(localStorage.getItem("resume_scores") || "{}");
+  const savedScores = scores.scores || [];
   const activeResumeIds = resumes.map((r) => r._id);
-  const activeScores = Object.entries(savedScores)
-    .filter(([id]) => activeResumeIds.includes(id))
-    .map(([_, score]) => Number(score));
+  const activeScores = savedScores.map(item => item.overallScore);
 
-  const totalResumes = resumes.length;
   const analysesCompleted = activeScores.length;
-  const highestScore = analysesCompleted > 0 ? Math.max(...activeScores) : 0;
+
+  const highestScore =
+    analysesCompleted > 0
+      ? Math.max(...activeScores)
+      : 0;
+
   const averageATS =
     analysesCompleted > 0
-      ? Math.round(activeScores.reduce((a, b) => a + b, 0) / analysesCompleted)
+      ? Math.round(
+        activeScores.reduce((sum, score) => sum + score, 0) /
+        analysesCompleted
+      )
       : 0;
 
   const stats = [
     {
       label: "Total Resumes",
-      value: totalResumes,
+      value: activeResumeIds.length,
       icon: FileText,
       color: "from-blue-500 to-indigo-500",
       bgLight: "bg-blue-50",
@@ -47,13 +52,14 @@ export default function WelcomeSection({ user, resumes = [] }) {
     },
     {
       label: "Analyses Completed",
-      value: `${analysesCompleted} / ${totalResumes}`,
+      value: `${analysesCompleted} / ${activeResumeIds.length}`,
       icon: CheckCircle,
       color: "from-emerald-500 to-teal-500",
       bgLight: "bg-emerald-50",
       textColor: "text-emerald-600",
     },
   ];
+
 
   return (
     <section id="dashboard" className="mb-10">

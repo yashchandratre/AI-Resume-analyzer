@@ -69,7 +69,11 @@ const deleteResume = async (req, res) => {
   try {
     const resumeId = req.params.resumeId;
     const resume = await Resume.findById(resumeId);
-    const analysisresult = await AnalysisResult.find({resume:resumeId})
+    const analysisResult = await AnalysisResult.findOne({
+      resume: resumeId,
+      user: req.user._id,
+    });
+    
     if (!resume) {
       return res.status(404).json({ error: "Resume not found" });
     }
@@ -80,8 +84,8 @@ const deleteResume = async (req, res) => {
     }
 
     await Resume.findByIdAndDelete(resumeId);
-    if(analysisresult){
-      await AnalysisResult.findByIdAndDelete(resumeId)
+    if (analysisResult) {
+      await AnalysisResult.findByIdAndDelete(analysisResult._id);
     }
     res.status(200).json({ message: "Resume deleted successfully" });
   } catch (error) {
@@ -91,4 +95,4 @@ const deleteResume = async (req, res) => {
       .json({ error: "An error occurred while deleting the resume." });
   }
 };
-module.exports = { uploadResume,deleteResume };
+module.exports = { uploadResume, deleteResume };
