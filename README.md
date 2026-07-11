@@ -172,16 +172,6 @@ Analysis History
 
 <img src="screenshots/AnalysisResult.png" width="100%">
 
-Example:
-
-```
-screenshots/
-    login.png
-    dashboard.png
-    upload.png
-    analysis.png
-    history.png
-```
 
 ---
 
