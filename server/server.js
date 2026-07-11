@@ -8,6 +8,7 @@ const router =require("./router/auth-router");
 const adminRouter = require("./router/admin-router");
 const resumeRouter = require("./router/resume-router");
 const analysisRouter = require("./router/analysis-router");
+const defaultRouter = require("./router/default-router");
 const cookieParser = require("cookie-parser")
 const user= require('./model/user_model');
 dotenv.config();
@@ -41,6 +42,7 @@ app.use("/api/auth",router);
 app.use("/api/admin", adminRouter);
 app.use("/api/resume", resumeRouter);
 app.use("/api/analysis", analysisRouter);
+app.use("/api/", defaultRouter);
 
 app.get("/health",async(req,res)=>{
     res.status(200).send({message:"Server is running"});

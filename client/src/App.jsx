@@ -8,6 +8,8 @@ import Layout from './Layout/Layout'
 import { Toaster } from 'sonner'
 import Resume from './Pages/Resume/Resume'
 import AnalysisHistory from './Pages/AnalysisHistory/AnalysisHistory'
+import CoverLetterApp from './Pages/CoverLetter/CoverLetter'
+import CoverLetter from './Pages/CoverLetter/CoverLetter'
 
 function App() {
 
@@ -45,6 +47,16 @@ function App() {
               <ProtectedRoute>
                 <Layout>
                   <AnalysisHistory />
+                </Layout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/coverletter/:resumeId"
+            element={
+              <ProtectedRoute>
+                <Layout>
+                  <CoverLetter />
                 </Layout>
               </ProtectedRoute>
             }

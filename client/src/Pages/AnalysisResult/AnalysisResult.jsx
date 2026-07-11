@@ -13,6 +13,8 @@ import SuggestionsCard from "./SuggestionsCard";
 import LoadingAnalysis from "./LoadingAnalysis";
 import API from "../../services/authapi";
 import { toast } from "sonner";
+import CoverLetterModal from "../CoverLetter/CoverLetterModal";
+import CoverLetterResult from "../CoverLetter/CoverLetterResult";
 
 export default function AnalysisResult() {
     const { resumeId } = useParams();
@@ -40,7 +42,6 @@ export default function AnalysisResult() {
             setError(message);
         }
     };
-
     const hasFetched = useRef(false);
 
     useEffect(() => {
@@ -98,6 +99,11 @@ export default function AnalysisResult() {
                             ATS Score & Recommendations
                         </h1>
                     </div>
+                </div>
+                <div className="ml-auto">
+                    <Link to={`/coverletter/${resumeId}`} className="rounded-xl bg-indigo-600 px-6 py-3 text-sm font-semibold text-white shadow-sm transition-all duration-200 ease-in-out hover:bg-indigo-700 hover:shadow-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 active:scale-98 cursor-pointer" >
+                        Generate Cover Letter
+                    </Link>
                 </div>
             </div>
 

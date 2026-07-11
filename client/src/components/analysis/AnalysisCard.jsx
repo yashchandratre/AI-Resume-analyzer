@@ -31,13 +31,16 @@ export default function AnalysisCard({analysis}){
                     }
                 </ul>
             </div>
-            <div className="mt-6">
+            <div className="mt-6 flex items-center justify-between">
                 <Link
                     to={`/analysis/${analysis.resume._id}`}
                     className="rounded-xl bg-indigo-600 px-5 py-3 text-white hover:bg-indigo-700"
                 >
                     View Report
                 </Link>
+                <button className="rounded-xl bg-indigo-600 px-5 py-3 text-white hover:bg-indigo-700 cursor-pointer">
+                    Generate Cover Letter
+                </button>
             </div>
         </div>
     )
