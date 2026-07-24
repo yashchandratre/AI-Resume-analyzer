@@ -6,13 +6,26 @@ export default function CoverLetterResult({
   onDownloadPDF, 
   onDownloadDOCX, 
   onRegenerate,
-  coverLetterText 
+  coverLetter 
 }) {
   
-  // Default placeholder text matching your requested layout structure
-  const defaultText = `Dear Hiring Manager,\n\nI am thrilled to express my interest in the Frontend Developer position at Google. With my strong background in building highly interactive, scalable web applications using React and modern frontend ecosystems, I am confident in my ability to contribute meaningfully to your engineering team.\n\nThroughout my development journey, I have focused on writing clean, maintainable code and optimizing user experiences. The opportunity to bring this dedication to a world-class team like Google is incredibly exciting.\n\nThank you for your time and consideration. I look forward to the possibility of discussing how my skills align with your current needs.\n\nRegards,\nYash Chandratre`;
-
-  const textToDisplay = coverLetterText || defaultText;
+  // Handlers for fallback display values
+  const company = coverLetter?.companyName || "Your Target Company";
+  const title = coverLetter?.jobTitle || "Job Position";
+  const bodyText = coverLetter?.coverLetter || "No cover letter content loaded.";
+  
+  // Format generation date if available, otherwise fallback
+  const displayDate = coverLetter?.createdAt 
+    ? new Date(coverLetter.createdAt).toLocaleDateString(undefined, { 
+        year: 'numeric', 
+        month: 'long', 
+        day: 'numeric' 
+      })
+    : new Date().toLocaleDateString(undefined, { 
+        year: 'numeric', 
+        month: 'long', 
+        day: 'numeric' 
+      });
 
   return (
     <div className="min-h-screen bg-slate-50/50 py-8 px-4 sm:px-6 lg:px-8">
@@ -30,19 +43,19 @@ export default function CoverLetterResult({
         </button>
 
         {/* Main Document Card */}
-        <div className="bg-white rounded-2xl border border-slate-200/80 shadow-sm p-6 sm:p-10 mb-6">
+        <div className="bg-white rounded-2xl border border-slate-200/80 shadow-sm p-6 sm:p-10 mb-6 text-left">
           
           {/* Document Meta Header */}
           <div className="border-b border-slate-100 pb-6 mb-8">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
               <div>
                 <span className="text-xs font-bold uppercase tracking-widest text-indigo-600">Cover Letter</span>
-                <h1 className="text-2xl font-bold text-slate-900 mt-1">Google</h1>
-                <p className="text-lg font-medium text-slate-600">Frontend Developer</p>
+                <h1 className="text-2xl font-bold text-slate-900 mt-1">{company}</h1>
+                <p className="text-lg font-medium text-slate-650">{title}</p>
               </div>
               <div className="sm:text-right">
                 <span className="inline-flex items-center rounded-md bg-slate-50 px-2.5 py-1 text-xs font-medium text-slate-500 ring-1 ring-inset ring-slate-600/10">
-                  Generated on 11 July 2026
+                  Generated on {displayDate}
                 </span>
               </div>
             </div>
@@ -50,11 +63,9 @@ export default function CoverLetterResult({
 
           {/* Letter Body */}
           <div className="prose prose-slate max-w-none">
-            {textToDisplay.split('\n\n').map((paragraph, index) => (
-              <p key={index} className="text-slate-700 leading-relaxed text-[15px] mb-4 whitespace-pre-line">
-                {paragraph}
-              </p>
-            ))}
+            <p className="text-slate-705 leading-relaxed text-[15px] mb-4 whitespace-pre-line">
+              {bodyText}
+            </p>
           </div>
         </div>
 

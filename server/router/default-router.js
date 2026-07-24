@@ -1,8 +1,13 @@
-const express =require("express");
+const express = require("express");
 const { authMiddleware } = require("../controllers/auth-controller");
-const { generateCoverLetterController } = require("../controllers/coverLetterController");
-const router =  express.Router();
+const { 
+  getCoverLetterController,
+  generateCoverLetterController 
+} = require("../controllers/coverLetterController");
 
-router.post("/coverletter/:resumeId",authMiddleware,generateCoverLetterController);
+const router = express.Router();
+
+router.get("/cover-letter/:resumeId", authMiddleware, getCoverLetterController);
+router.post("/cover-letter/:resumeId", authMiddleware, generateCoverLetterController);
 
 module.exports = router;

@@ -57,9 +57,9 @@ const generateCoverLetter = async ({
   companyName,
   jobTitle,
   jobDescription,
-  hiringManager,
   fullName,
 }) => {
+  console.log("Resume Text","\nCompany name",companyName,"\n Job Title name",jobTitle,jobDescription)
   try {
     const prompt = `
 You are a senior HR recruiter with over 15 years of experience.

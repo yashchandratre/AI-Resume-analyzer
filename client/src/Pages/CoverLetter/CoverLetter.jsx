@@ -1,54 +1,136 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import CoverLetterModal from './CoverLetterModal';
 import CoverLetterResult from './CoverLetterResult';
 import API from '../../services/authapi';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
+import { toast } from 'sonner';
 
 export default function CoverLetter() {
+  const { resumeId } = useParams();
+  const navigate = useNavigate();
+
+  const [coverLetter, setCoverLetter] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [showResult, setShowResult] = useState(false);
-  const [letterContent, setLetterContent] = useState('');
-  const {resumeId} = useParams(); // Assuming you are using react-router to get the resume ID from the URL
-  // 1. Handles form submissions from inside the modal
-  const handleFormSubmit = async(formData) => {
-    console.log('Generating letter with data:', formData);
-    
+  const [isChecking, setIsChecking] = useState(true);
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [error, setError] = useState('');
+
+  const hasChecked = useRef(false);
+
+  // 1. Check MongoDB for existing cover letter on mount
+  useEffect(() => {
+    if (hasChecked.current) return;
+    hasChecked.current = true;
+
+    const checkExistingCoverLetter = async () => {
+      try {
+        setIsChecking(true);
+        setError('');
+        
+        // GET /api/cover-letter/:resumeId
+        const response = await API.get(`/cover-letter/${resumeId}`);
+        
+        if (response.data.success && response.data.exists) {
+          setCoverLetter(response.data.coverLetter);
+        } else {
+          // If not exists, open the modal
+          setIsModalOpen(true);
+        }
+      } catch (err) {
+        console.error("Error checking existing cover letter:", err);
+        const errMsg = err.response?.data?.error || "Error checking existing cover letter.";
+        setError(errMsg);
+        toast.error(errMsg);
+      } finally {
+        setIsChecking(false);
+      }
+    };
+
+    checkExistingCoverLetter();
+  }, [resumeId]);
+
+  // 2. Handles form submissions from inside the modal (POST generation)
+  const handleFormSubmit = async (formData) => {
+    if (isGenerating) return;
+
     try {
-      const res = await API.post(`/coverletter/${resumeId}`, formData);
-      const generatedLetter = res.data;
-      console.log('Generated letter:', generatedLetter);
-      setLetterContent(generatedLetter);
-      setIsModalOpen(false); // Close the entry modal
-      setShowResult(true);   // Display the document canvas view
-    } catch (error) {
-      console.log('Error generating cover letter:', error);
+      setIsGenerating(true);
+      setError('');
+      
+      // POST /api/cover-letter/:resumeId
+      const response = await API.post(`/cover-letter/${resumeId}`, formData);
+      
+      if (response.data?.coverLetter) {
+        // Use returned data directly (no extra GET request)
+        setCoverLetter(response.data.coverLetter);
+        setIsModalOpen(false); // Close modal only on success
+        toast.success("Cover letter generated successfully!");
+      } else {
+        throw new Error("Invalid response structure from server");
+      }
+    } catch (err) {
+      console.error('Error generating cover letter:', err);
+      const errMsg = err.response?.data?.error || err.response?.data?.msg || "Failed to generate cover letter.";
+      setError(errMsg);
+      toast.error(errMsg);
+      // Keep modal open and form data intact if generation fails
+    } finally {
+      setIsGenerating(false);
     }
-    
   };
 
-  // 2. Action Toolbar Handlers
+  // Action Toolbar Handlers
   const handleCopy = () => {
-    navigator.clipboard.writeText(letterContent);
-    alert('Copied to clipboard!');
+    if (coverLetter?.coverLetter) {
+      navigator.clipboard.writeText(coverLetter.coverLetter);
+      toast.success('Copied to clipboard!');
+    }
   };
 
   const handleDownloadPDF = () => {
     console.log('Trigger PDF compilation sequence...');
+    toast.info('PDF download coming soon!');
   };
 
   const handleDownloadDOCX = () => {
     console.log('Trigger Office XML format compilation sequence...');
+    toast.info('DOCX download coming soon!');
   };
+
+  if (isChecking) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-slate-50/50">
+        <div className="text-center">
+          <div className="animate-spin h-10 w-10 border-4 border-indigo-655 border-t-transparent rounded-full mx-auto" />
+          <p className="mt-4 text-sm font-semibold text-slate-600">Checking existing documents...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="p-6 text-center">
-      {/* State Switcher View Layout */}
-      {!showResult ? (
+      {error && !coverLetter && (
+        <div className="max-w-md mx-auto mb-6 p-4 rounded-xl bg-rose-50 border border-rose-100 text-sm text-rose-700">
+          {error}
+        </div>
+      )}
+
+      {coverLetter ? (
+        /* The Document Result Canvas View */
+        <CoverLetterResult 
+          coverLetter={coverLetter}
+          onBack={() => navigate(`/analysis/${resumeId}`)}
+          onCopy={handleCopy}
+          onDownloadPDF={handleDownloadPDF}
+          onDownloadDOCX={handleDownloadDOCX}
+          onRegenerate={() => setIsModalOpen(true)}
+        />
+      ) : (
         <div className="max-w-md mx-auto mt-20 p-8 border border-slate-200 rounded-2xl bg-white shadow-sm">
           <h2 className="text-xl font-bold mb-2">Cover Letter Workspace</h2>
           <p className="text-sm text-slate-500 mb-6">Create professional, tailored cover letters instantaneously.</p>
           
-          {/* The primary improved button that opens the modal trigger */}
           <button 
             onClick={() => setIsModalOpen(true)}
             className="rounded-xl bg-indigo-600 px-6 py-3 text-sm font-semibold text-white shadow-sm transition-all duration-200 ease-in-out hover:bg-indigo-700 active:scale-98 cursor-pointer"
@@ -56,16 +138,6 @@ export default function CoverLetter() {
             Generate Cover Letter
           </button>
         </div>
-      ) : (
-        /* The Document Result Canvas View */
-        <CoverLetterResult 
-          coverLetterText={letterContent}
-          onBack={() => setShowResult(false)}
-          onCopy={handleCopy}
-          onDownloadPDF={handleDownloadPDF}
-          onDownloadDOCX={handleDownloadDOCX}
-          onRegenerate={() => setIsModalOpen(true)}
-        />
       )}
 
       {/* The Configuration Details Form Modal */}
@@ -73,6 +145,7 @@ export default function CoverLetter() {
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         onSubmit={handleFormSubmit}
+        isGenerating={isGenerating}
       />
     </div>
   );

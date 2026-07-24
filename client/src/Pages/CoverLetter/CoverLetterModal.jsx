@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
 
-export default function CoverLetterModal({ isOpen, onClose, onSubmit }) {
+export default function CoverLetterModal({ isOpen, onClose, onSubmit, isGenerating }) {
   const [formData, setFormData] = useState({
     fullName: '',
     jobTitle: '',
     companyName: '',
     jobDescription: '',
+    hiringManager: '', // optional field
   });
 
   if (!isOpen) return null;
@@ -17,6 +18,14 @@ export default function CoverLetterModal({ isOpen, onClose, onSubmit }) {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    if (isGenerating) return;
+    
+    // Validate required fields
+    if (!formData.fullName.trim() || !formData.jobTitle.trim() || !formData.companyName.trim() || !formData.jobDescription.trim()) {
+      alert("Please fill in all required fields.");
+      return;
+    }
+
     onSubmit(formData);
   };
 
@@ -25,7 +34,9 @@ export default function CoverLetterModal({ isOpen, onClose, onSubmit }) {
       {/* Backdrop Overlay */}
       <div 
         className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm transition-opacity animate-fade-in"
-        onClick={onClose}
+        onClick={() => {
+          if (!isGenerating) onClose();
+        }}
       />
 
       {/* Modal Container */}
@@ -34,7 +45,8 @@ export default function CoverLetterModal({ isOpen, onClose, onSubmit }) {
         {/* Close Button */}
         <button 
           onClick={onClose}
-          className="absolute right-4 top-4 rounded-lg p-1.5 text-slate-400 hover:bg-slate-50 hover:text-slate-600 transition-colors cursor-pointer"
+          disabled={isGenerating}
+          className="absolute right-4 top-4 rounded-lg p-1.5 text-slate-400 hover:bg-slate-50 hover:text-slate-600 transition-colors cursor-pointer disabled:cursor-not-allowed disabled:opacity-50"
           aria-label="Close modal"
         >
           <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
@@ -54,17 +66,18 @@ export default function CoverLetterModal({ isOpen, onClose, onSubmit }) {
           {/* Full Name */}
           <div>
             <label htmlFor="fullName" className="block text-xs font-semibold uppercase tracking-wider text-slate-600 mb-1.5">
-              Full Name
+              Full Name *
             </label>
             <input
               type="text"
               id="fullName"
               name="fullName"
               required
+              disabled={isGenerating}
               value={formData.fullName}
               onChange={handleChange}
               placeholder="John Doe"
-              className="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-4 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:border-indigo-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/10 transition-all"
+              className="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-4 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:border-indigo-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/10 transition-all disabled:opacity-60 disabled:cursor-not-allowed"
             />
           </div>
 
@@ -72,51 +85,71 @@ export default function CoverLetterModal({ isOpen, onClose, onSubmit }) {
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div>
               <label htmlFor="jobTitle" className="block text-xs font-semibold uppercase tracking-wider text-slate-600 mb-1.5">
-                Target Job Title
+                Target Job Title *
               </label>
               <input
                 type="text"
                 id="jobTitle"
                 name="jobTitle"
                 required
+                disabled={isGenerating}
                 value={formData.jobTitle}
                 onChange={handleChange}
                 placeholder="Software Engineer"
-                className="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-4 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:border-indigo-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/10 transition-all"
+                className="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-4 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:border-indigo-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/10 transition-all disabled:opacity-60 disabled:cursor-not-allowed"
               />
             </div>
 
             <div>
               <label htmlFor="companyName" className="block text-xs font-semibold uppercase tracking-wider text-slate-600 mb-1.5">
-                Company Name
+                Company Name *
               </label>
               <input
                 type="text"
                 id="companyName"
                 name="companyName"
                 required
+                disabled={isGenerating}
                 value={formData.companyName}
                 onChange={handleChange}
                 placeholder="Acme Corp"
-                className="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-4 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:border-indigo-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/10 transition-all"
+                className="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-4 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:border-indigo-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/10 transition-all disabled:opacity-60 disabled:cursor-not-allowed"
               />
             </div>
+          </div>
+
+          {/* Hiring Manager (Optional field) */}
+          <div>
+            <label htmlFor="hiringManager" className="block text-xs font-semibold uppercase tracking-wider text-slate-600 mb-1.5">
+              Hiring Manager (Optional)
+            </label>
+            <input
+              type="text"
+              id="hiringManager"
+              name="hiringManager"
+              disabled={isGenerating}
+              value={formData.hiringManager}
+              onChange={handleChange}
+              placeholder="Jane Smith"
+              className="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-4 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:border-indigo-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/10 transition-all disabled:opacity-60 disabled:cursor-not-allowed"
+            />
           </div>
 
           {/* Job Description */}
           <div>
             <label htmlFor="jobDescription" className="block text-xs font-semibold uppercase tracking-wider text-slate-600 mb-1.5">
-              Job Description / Requirements
+              Job Description / Requirements *
             </label>
             <textarea
               id="jobDescription"
               name="jobDescription"
               required
+              disabled={isGenerating}
               rows={4}
               value={formData.jobDescription}
               onChange={handleChange}
               placeholder="Paste the key responsibilities or full job posting here..."
-              className="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-4 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:border-indigo-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/10 transition-all resize-none"
+              className="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-4 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:border-indigo-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/10 transition-all resize-none disabled:opacity-60 disabled:cursor-not-allowed"
             />
           </div>
 
@@ -125,18 +158,29 @@ export default function CoverLetterModal({ isOpen, onClose, onSubmit }) {
             <button
               type="button"
               onClick={onClose}
-              className="rounded-xl border border-slate-200 px-5 py-3 text-sm font-semibold text-slate-700 transition-all hover:bg-slate-50 active:scale-98 cursor-pointer"
+              disabled={isGenerating}
+              className="rounded-xl border border-slate-200 px-5 py-3 text-sm font-semibold text-slate-700 transition-all hover:bg-slate-50 active:scale-98 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
             >
               Cancel
             </button>
             <button
               type="submit"
-              className="inline-flex items-center justify-center gap-2 rounded-xl bg-indigo-600 px-6 py-3 text-sm font-semibold text-white shadow-sm transition-all duration-200 ease-in-out hover:bg-indigo-700 hover:shadow-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 active:scale-98 cursor-pointer"
+              disabled={isGenerating}
+              className="inline-flex items-center justify-center gap-2 rounded-xl bg-indigo-600 px-6 py-3 text-sm font-semibold text-white shadow-sm transition-all duration-200 ease-in-out hover:bg-indigo-700 hover:shadow-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 active:scale-98 cursor-pointer disabled:bg-indigo-400 disabled:cursor-not-allowed"
             >
-              <span>Generate Cover Letter</span>
-              <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-              </svg>
+              {isGenerating ? (
+                <>
+                  <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/40 border-t-white" />
+                  Generating...
+                </>
+              ) : (
+                <>
+                  <span>Generate Cover Letter</span>
+                  <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                  </svg>
+                </>
+              )}
             </button>
           </div>
 
