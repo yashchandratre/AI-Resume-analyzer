@@ -20,6 +20,7 @@ app.use(
   cors({
     origin: [
       "http://localhost:5173",
+      "https://analysisresumeby.netlify.app"
     ],
     methods: ["GET", "POST", "PATCH","DELETE", "PUT"],
     credentials: true
